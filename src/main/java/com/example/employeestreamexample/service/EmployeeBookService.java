@@ -33,7 +33,7 @@ public interface EmployeeBookService {
 //
 //    void departmentAverageMonthsSalary(byte departmentNumber);
 
-    Employee departmentEmployees(byte departmentNumber);
+    Collection departmentEmployees(byte departmentNumber);
 
 //    void departmentSalaryIndex(byte departmentNumber, double index);
 //

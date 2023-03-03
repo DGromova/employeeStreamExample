@@ -42,7 +42,7 @@ public class EmployeeController {
         return service.departmentEmployeesMinSalary(departmentNumber);
     }
     @GetMapping("/departments/filter")
-    public Employee departmentEmployees(@RequestParam byte departmentNumber) {
+    public Collection departmentEmployees(@RequestParam byte departmentNumber) {
         return service.departmentEmployees(departmentNumber);
     }
 }

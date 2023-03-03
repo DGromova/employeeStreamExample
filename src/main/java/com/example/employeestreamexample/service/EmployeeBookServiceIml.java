@@ -1,15 +1,12 @@
 package com.example.employeestreamexample.service;
 
-import com.example.employeestreamexample.exception.DepartmentNotFoundException;
 import com.example.employeestreamexample.exception.EmployeeAlreadyAddedException;
 import com.example.employeestreamexample.exception.EmployeeNotFoundException;
 import com.example.employeestreamexample.model.Employee;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class EmployeeBookServiceIml implements EmployeeBookService {
@@ -176,11 +173,10 @@ public class EmployeeBookServiceIml implements EmployeeBookService {
 //    }
 
     @Override
-    public Employee departmentEmployees(byte departmentNumber) {
-        employees.entrySet().stream()
-                .filter(employees -> employees.getValue().getDepartment() == departmentNumber)
-                .forEach(System.out::println);
-        return null;
+    public Collection departmentEmployees(byte departmentNumber) {
+        return employees.values().stream()
+                .filter(employees -> employees.getDepartment() == departmentNumber)
+                .collect(Collectors.toList());
     }
 //        System.out.println("Список сотрудников выбранного отдела: ");
 //        String result = null;
