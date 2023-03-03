@@ -30,6 +30,7 @@ public class Employee {
     public String getMiddleName() {
         return middleName;
     }
+    public String getFullName() { return lastName + " " + firstName + " " + middleName; }
 
     public byte getDepartment() {
         return department;

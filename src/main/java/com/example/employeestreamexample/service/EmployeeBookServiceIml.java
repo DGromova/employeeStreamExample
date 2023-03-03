@@ -1,47 +1,51 @@
 package com.example.employeestreamexample.service;
 
 import com.example.employeestreamexample.exception.DepartmentNotFoundException;
+import com.example.employeestreamexample.exception.EmployeeAlreadyAddedException;
 import com.example.employeestreamexample.exception.EmployeeNotFoundException;
 import com.example.employeestreamexample.model.Employee;
+import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Service
 public class EmployeeBookServiceIml implements EmployeeBookService {
-    private Map<String, Employee> employeesMap = new HashMap<>();
+    private final Map<String, Employee> employees = new HashMap<>();
 
     @Override
     public Employee addEmployee(String lastName, String firstName, String middleName, byte department, double salary) {
         Employee employee = new Employee(lastName, firstName, middleName, department, salary);
-        employeesMap.putIfAbsent(lastName + " " + firstName + " " + middleName, employee);
+        if(employees.containsKey(employee.getFullName())) {
+            throw new EmployeeAlreadyAddedException();
+        }
+        employees.put(employee.getFullName(), employee);
         return employee;
     }
 
     @Override
-    public Employee removeEmployee(String person, String firstName, String middleName, byte department, double salary) {
-        if (employeesMap.containsKey(person)) {
-            return employeesMap.remove(person);
+    public Employee removeEmployee(String lastName, String firstName, String middleName, byte department, double salary) {
+        Employee employee = new Employee(lastName, firstName, middleName, department, salary);
+        if (employees.containsKey(employee.getFullName())) {
+            return employees.remove(employee.getFullName());
         } else {
             throw new EmployeeNotFoundException();
         }
     }
 
     @Override
-    public Employee printAllEmployees() {
-        for (Employee employeesMap : employeesMap.values()) {
-            System.out.println(employeesMap);
+    public Employee findEmployee(String lastName, String firstName, String middleName, byte department, double salary) {
+        Employee employee = new Employee(lastName, firstName, middleName, department, salary);
+        if (employees.containsKey(employee.getFullName())) {
+            return employees.get(employee.getFullName());
         }
-        return null;
+        throw new EmployeeNotFoundException();
     }
-
     @Override
-    public Employee getEmployee(String employee, String firstName, String middleName, byte department, double salary) {
-        if (employeesMap.containsKey(employee)) {
-            System.out.println(employeesMap.get(employee));
-        } else {
-            throw new EmployeeNotFoundException();
-        }
-        return null;
+    public Collection printAllEmployees() {
+        return Collections.unmodifiableCollection(employees.values());
     }
 
 //    @Override
@@ -107,15 +111,20 @@ public class EmployeeBookServiceIml implements EmployeeBookService {
 
     @Override
     public Employee departmentEmployeesMinSalary(byte departmentNumber) {
+//        Stream employee = employees.entrySet().stream()
+//                .filter(employees -> employees.getValue().getDepartment() == departmentNumber)
+//                .min(Comparator.comparingInt(employees -> (int) employees.getValue().getSalary())).stream()
+//                .;
+
         Set<Double> actualDepartmentSalaryList = new HashSet();
-        for (Employee employee : employeesMap.values()) {
+        for (Employee employee : employees.values()) {
             if (employee.getDepartment() == departmentNumber) {
                 actualDepartmentSalaryList.add(employee.getSalary());
             }
         }
         double minSalary;
         minSalary = Collections.min(actualDepartmentSalaryList);
-        for (Employee employee : employeesMap.values()) {
+        for (Employee employee : employees.values()) {
             if (employee.getSalary() == minSalary & employee.getDepartment() == departmentNumber) {
                 System.out.println(("Сотрудник отдела №" + departmentNumber + " с минимальной зарплатой: " + "id:" + employee.getId() + " " + employee.getLastName() + " " + employee.getFirstName() + " " +
                         employee.getMiddleName() + " Зарплата " + employee.getSalary() + " рублей."));
@@ -127,14 +136,14 @@ public class EmployeeBookServiceIml implements EmployeeBookService {
     @Override
     public Employee departmentEmployeesMaxSalary(byte departmentNumber) {
         Set<Double> presentDepartmentSalaryList = new HashSet();
-        for (Employee employee : employeesMap.values()) {
+        for (Employee employee : employees.values()) {
             if (employee.getDepartment() == departmentNumber) {
                 presentDepartmentSalaryList.add(employee.getSalary());
             }
         }
         double maxSalary;
         maxSalary = Collections.max(presentDepartmentSalaryList);
-        for (Employee employee : employeesMap.values()) {
+        for (Employee employee : employees.values()) {
             if (employee.getSalary() == maxSalary & employee.getDepartment() == departmentNumber) {
                 System.out.println(("Сотрудник отдела №" + departmentNumber + " с максимальной зарплатой: " + "id:" + employee.getId() + " " + employee.getLastName() + " " + employee.getFirstName() + " " +
                         employee.getMiddleName() + " Зарплата " + employee.getSalary() + " рублей."));
@@ -143,17 +152,17 @@ public class EmployeeBookServiceIml implements EmployeeBookService {
         return null;
     }
 
-    @Override
-    public double departmentSalaryMonthsSum(byte departmentNumber) {
-        double departmentSalaryMonthsSum = 0;
-        for (Employee employee : employeesMap.values()) {
-            if (employee.getDepartment() == departmentNumber) {
-                departmentSalaryMonthsSum = departmentSalaryMonthsSum + employee.getSalary();
-            }
-        }
-        System.out.println("Сумма затрат на зарплаты в месяц в отделе №" + departmentNumber + ": " + departmentSalaryMonthsSum + " рублей.");
-        return departmentSalaryMonthsSum;
-    }
+//    @Override
+//    public double departmentSalaryMonthsSum(byte departmentNumber) {
+//        double departmentSalaryMonthsSum = 0;
+//        for (Employee employee : employees.values()) {
+//            if (employee.getDepartment() == departmentNumber) {
+//                departmentSalaryMonthsSum = departmentSalaryMonthsSum + employee.getSalary();
+//            }
+//        }
+//        System.out.println("Сумма затрат на зарплаты в месяц в отделе №" + departmentNumber + ": " + departmentSalaryMonthsSum + " рублей.");
+//        return departmentSalaryMonthsSum;
+//    }
 
 //    @Override
 //    public void departmentAverageMonthsSalary(byte departmentNumber) {
@@ -168,20 +177,24 @@ public class EmployeeBookServiceIml implements EmployeeBookService {
 
     @Override
     public Employee departmentEmployees(byte departmentNumber) {
-        System.out.println("Список сотрудников выбранного отдела: ");
-        String result = null;
-        for (Employee employee : employeesMap.values()) {
-            if (employee.getDepartment() == departmentNumber) {
-                result = "EmployeeFound";
-                System.out.println("Сотрудник отдела №" + departmentNumber + ": " + "id:" + employee.getId() + " " + employee.getLastName() + " " + employee.getFirstName() + " " +
-                        employee.getMiddleName() + " Зарплата " + employee.getSalary() + " рублей.");
-            }
-        }
-        if (result == null) {
-            throw new DepartmentNotFoundException();
-        }
+        employees.entrySet().stream()
+                .filter(employees -> employees.getValue().getDepartment() == departmentNumber)
+                .forEach(System.out::println);
         return null;
     }
+//        System.out.println("Список сотрудников выбранного отдела: ");
+//        String result = null;
+//        for (Employee employee : employees.values()) {
+//            if (employee.getDepartment() == departmentNumber) {
+//                result = "EmployeeFound";
+//                System.out.println("Сотрудник отдела №" + departmentNumber + ": " + "id:" + employee.getId() + " " + employee.getLastName() + " " + employee.getFirstName() + " " +
+//                        employee.getMiddleName() + " Зарплата " + employee.getSalary() + " рублей.");
+//            }
+//        }
+//        if (result == null) {
+//            throw new DepartmentNotFoundException();
+//        }
+//    }
 
 //    @Override
 //    public void departmentSalaryIndex(byte departmentNumber, double index) {

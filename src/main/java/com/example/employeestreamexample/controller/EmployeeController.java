@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collection;
+
 @RestController
 @RequestMapping("/employee")
 public class EmployeeController {
@@ -24,23 +26,23 @@ public class EmployeeController {
         return service.removeEmployee(lastName, firstName, middleName, department, salary);
     }
     @GetMapping("/find")
-    public Employee getEmployee(@RequestParam String lastName, @RequestParam String firstName, @RequestParam String middleName, @RequestParam byte department, @RequestParam double salary) {
-        return service.getEmployee(lastName, firstName, middleName, department, salary);
+    public Employee findEmployee(@RequestParam String lastName, @RequestParam String firstName, @RequestParam String middleName, @RequestParam byte department, @RequestParam double salary) {
+        return service.findEmployee(lastName, firstName, middleName, department, salary);
     }
     @GetMapping("/all")
-    public Employee findAll() {
+    public Collection printAllEmployees() {
         return service.printAllEmployees();
     }
-    @GetMapping("/max-salary")
+    @GetMapping("/departments/max-salary")
     public Employee departmentEmployeesMaxSalary(@RequestParam byte departmentNumber) {
         return service.departmentEmployeesMaxSalary(departmentNumber);
     }
-    @GetMapping("/min-salary")
+    @GetMapping("/departments/min-salary")
     public Employee departmentEmployeesMinSalary(@RequestParam byte departmentNumber) {
         return service.departmentEmployeesMinSalary(departmentNumber);
     }
-    @GetMapping("/all")
-    public Employee departmentEmployees(byte departmentNumber) {
+    @GetMapping("/departments/filter")
+    public Employee departmentEmployees(@RequestParam byte departmentNumber) {
         return service.departmentEmployees(departmentNumber);
     }
 }
