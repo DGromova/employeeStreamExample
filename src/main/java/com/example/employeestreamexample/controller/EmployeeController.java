@@ -33,12 +33,13 @@ public class EmployeeController {
     public Collection printAllEmployees() {
         return service.printAllEmployees();
     }
+
     @GetMapping("/departments/max-salary")
-    public Employee departmentEmployeesMaxSalary(@RequestParam byte departmentNumber) {
+    public Collection departmentEmployeesMaxSalary(@RequestParam byte departmentNumber) {
         return service.departmentEmployeesMaxSalary(departmentNumber);
     }
     @GetMapping("/departments/min-salary")
-    public Employee departmentEmployeesMinSalary(@RequestParam byte departmentNumber) {
+    public Collection departmentEmployeesMinSalary(@RequestParam byte departmentNumber) {
         return service.departmentEmployeesMinSalary(departmentNumber);
     }
     @GetMapping("/departments/filter")
