@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.groupingBy;
+
 @Service
 public class EmployeeBookServiceIml implements EmployeeBookService {
     private final Map<String, Employee> employees = new HashMap<>();
@@ -42,7 +44,9 @@ public class EmployeeBookServiceIml implements EmployeeBookService {
     }
     @Override
     public Collection printAllEmployees() {
-        return Collections.unmodifiableCollection(employees.values());
+        return Collections.singleton(employees.values().stream()
+                .collect(groupingBy(employees -> employees.getDepartment(), Collectors.toUnmodifiableSet())));
+        //Collections.unmodifiableCollection(employees.values());
     }
 
     @Override
